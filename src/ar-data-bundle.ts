@@ -4,6 +4,7 @@ import type DataItem from "./DataItem";
 import Bundle from "./Bundle";
 import type { Signer } from "./signing/Signer";
 import { getCryptoDriver } from "$/utils";
+import { ArconnectSigner } from "./signing/chains";
 
 /**
  * Unbundles a transaction into an Array of DataItems.
@@ -64,9 +65,9 @@ export async function bundleAndSignData(dataItems: DataItem[], signer: Signer): 
  * @returns signings - signature and id in byte-arrays
  */
 export async function getSignatureAndId(item: DataItem, signer: Signer): Promise<{ signature: Buffer; id: Buffer }> {
-  const signatureData = await getSignatureData(item);
+  const signatureData = signer instanceof ArconnectSigner ? item.rawData : await getSignatureData(item);
 
-  const signatureBytes = await signer.sign(signatureData);
+  const signatureBytes = await signer.sign(signatureData, { target: item.target, anchor: item.anchor, tags: item.tags });
   const idBytes = await getCryptoDriver().hash(signatureBytes);
 
   return { signature: Buffer.from(signatureBytes), id: Buffer.from(idBytes) };

@@ -4,6 +4,7 @@ import base64url from "base64url";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as _ from "arconnect";
 import { getCryptoDriver } from "$/utils";
+import { Buffer } from "buffer";
 
 export default class InjectedArweaveSigner implements Signer {
   private signer: Window["arweaveWallet"];
@@ -20,19 +21,15 @@ export default class InjectedArweaveSigner implements Signer {
     this.publicKey = base64url.toBuffer(arOwner);
   }
 
-  async sign(message: Uint8Array): Promise<Uint8Array> {
+  async sign(data: Uint8Array, opts: { target: string; anchor: string; tags: { name: string; value: string }[] }): Promise<Uint8Array> {
     if (!this.publicKey) {
       await this.setPublicKey();
     }
 
-    const algorithm = {
-      name: "RSA-PSS",
-      saltLength: 32,
-    };
-
-    const signature = await this.signer.signature(message, algorithm);
-    const buf = new Uint8Array(Object.values(signature).map((v) => +v));
-    return buf;
+    // @ts-expect-error -- this API is offered by arconnect
+    const signedBinary = await this.signer.signDataItem({ data, ...opts });
+    const signature = Buffer.from(signedBinary).subarray(2, 2 + this.signatureLength);
+    return Uint8Array.from(signature);
   }
 
   static async verify(pk: string, message: Uint8Array, signature: Uint8Array): Promise<boolean> {
