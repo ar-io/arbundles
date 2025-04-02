@@ -33,7 +33,9 @@ function serializeTagsAVSC(tags: { name: string; value: string }[]): Buffer {
 }
 
 export function generateRandomTags(
-  tagsCount = randomInt(1, 20),
+  // NB: Lowered upper bound to 19 as this would sometimes generate tags that
+  //     serialize to more than 4096 bytes.
+  tagsCount = randomInt(1, 19),
   maxChars = 100,
 ): {
   name: string;

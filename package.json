@@ -1,14 +1,14 @@
 {
-  "name": "@ar.io/arbundles",
-  "version": "1.0.1",
+  "name": "@memetic-block/hank-hills-ass",
+  "version": "1.1.0",
   "description": "Arweave bundling library",
   "author": {
-    "name": "Permanent Data Solutions Inc",
-    "email": "info@ar.io",
-    "website": "https://ar.io"
+    "name": "Memetic Block",
+    "email": "info@memeticblock.com",
+    "website": "https://memeticblock.com"
   },
   "license": "Apache-2.0",
-  "repository": "https://github.com/ar-io/arbundles",
+  "repository": "https://github.com/memetic-block/hank-hills-ass",
   "main": "build/node/cjs/index.js",
   "module": "build/node/esm/index.js",
   "browser": "build/web/esm/webIndex.js",
@@ -79,7 +79,11 @@
     "./src/**/*"
   ],
   "scripts": {
-    "build": "rm -rf ./build && concurrently \"tsc -p tsconfig.json && resolve-tspaths -p tsconfig.json && sh ./fix-pkg.sh node/esm module && yarn tsc-esm-fix --tsconfig tsconfig.json \" \"tsc -p cjs.tsconfig.json && resolve-tspaths -p cjs.tsconfig.json && sh ./fix-pkg.sh node/cjs commonjs \"  \"tsc -p web.tsconfig.json && resolve-tspaths -p web.tsconfig.json && sh ./fix-pkg.sh web/esm module && yarn tsc-esm-fix --tsconfig web.tsconfig.json \" \"tsc -p web-cjs.tsconfig.json && resolve-tspaths -p web-cjs.tsconfig.json && sh ./fix-pkg.sh web/cjs commonjs\" && webpack",
+    "build": "rm -rf ./build && concurrently \"tsc -p tsconfig.build.json && resolve-tspaths -p tsconfig.build.json && sh ./fix-pkg.sh node/esm module && yarn tsc-esm-fix --tsconfig tsconfig.build.json \" \"tsc -p tsconfig.cjs.json && resolve-tspaths -p tsconfig.cjs.json && sh ./fix-pkg.sh node/cjs commonjs \"  \"tsc -p tsconfig.web.json && resolve-tspaths -p tsconfig.web.json && sh ./fix-pkg.sh web/esm module && yarn tsc-esm-fix --tsconfig tsconfig.web.json \" \"tsc -p tsconfig.web-cjs.json && resolve-tspaths -p tsconfig.web-cjs.json && sh ./fix-pkg.sh web/cjs commonjs\" && webpack",
+    "build:base": "rm -rf ./build && tsc -p tsconfig.build.json && resolve-tspaths -p tsconfig.build.json && sh ./fix-pkg.sh node/esm module && yarn tsc-esm-fix --tsconfig tsconfig.build.json",
+    "build:cjs": "rm -rf ./build && tsc -p tsconfig.cjs.json && resolve-tspaths -p tsconfig.cjs.json && sh ./fix-pkg.sh node/cjs commonjs",
+    "build:web": "rm -rf ./build && tsc -p tsconfig.web.json && resolve-tspaths -p tsconfig.web.json && sh ./fix-pkg.sh web/esm module && yarn tsc-esm-fix --tsconfig tsconfig.web.json",
+    "build:web-cjs": "rm -rf ./build && tsc -p tsconfig.web-cjs.json && resolve-tspaths -p tsconfig.web-cjs.json && sh ./fix-pkg.sh web/cjs commonjs",
     "lint": "eslint ./src -c ./.eslintrc.json --ext .ts,.tsx",
     "lint:fix": "eslint ./src -c ./.eslintrc.json --ext .ts,.tsx --fix",
     "test": "jest --coverage",
@@ -98,9 +102,7 @@
     "@types/secp256k1": "^4.0.3",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
-    "aptos": "^1.3.13",
     "arconnect": "^0.4.2",
-    "assert": "^2.0.0",
     "avsc": "https://github.com/Bundlr-Network/avsc#csp-fixes",
     "browserify-zlib": "^0.2.0",
     "concurrently": "^8.0.1",
@@ -143,14 +145,13 @@
     "@ethersproject/wallet": "^5.7.0",
     "@noble/ed25519": "^1.6.1",
     "arweave": "^1.15.1",
+    "axios": "^1.8.4",
     "base64url": "^3.0.1",
     "bs58": "^4.0.1",
     "keccak": "^3.0.2",
     "secp256k1": "^5.0.0"
   },
   "optionalDependencies": {
-    "@randlabs/myalgo-connect": "^1.1.2",
-    "algosdk": "^1.13.1",
     "arweave-stream-tx": "^1.1.0",
     "multistream": "^4.1.0",
     "tmp-promise": "^3.0.2"

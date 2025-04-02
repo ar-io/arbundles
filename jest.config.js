@@ -1,19 +1,31 @@
-const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('./tsconfig.json');
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: 'node',
   transform: {
-    "^.+\\.tsx?$": "ts-jest",
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.build.json',
+      },
+    ],
   },
-  moduleFileExtensions: ["ts", "js", "json"],
-  //src or file
-  testRegex: "((src|file))/.*(test|spec)\\.(ts)x?$",
-  coverageDirectory: "coverage",
-  // dont collect covergage from injected
-  collectCoverageFrom: ["((src)|(file))/**/*.{ts,js}", "!src/**/*.d.ts"], // , "!src/**/*[I|i]njected*.ts"], // in case we want only the covery of not injecected stuff
-  setupFiles: ["<rootDir>/src/__tests__/setup.jest.js"],
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {prefix: "src/"}),
-  modulePaths: [
-    '<rootDir>'
+  moduleFileExtensions: [
+    'js',
+    'json',
+    'ts',
   ],
-};
+  testRegex: '((src|file))/.*(test|spec)\\.(ts)x?$',
+  coverageDirectory: 'coverage',
+  collectCoverageFrom: [
+    '((src)|(file))/**/*.{ts,js}',
+    '!src/**/*.d.ts',
+  ],
+  setupFiles: [
+    '<rootDir>/src/__tests__/setup.jest.js',
+  ],
+  moduleNameMapper: {
+    '^\\$/utils$': 'src/nodeUtils.ts',
+  },
+  modulePaths: [
+    '<rootDir>',
+  ],
+}
