@@ -7,11 +7,9 @@ import { deepHash, MAX_TAG_BYTES } from "../index";
 import { getCryptoDriver, stringToBuffer } from "$/utils";
 import type { Signer } from "../signing/index";
 import { indexToType } from "../signing/index";
-import type { AxiosResponse } from "axios";
-import axios from "axios";
 import { SIG_CONFIG } from "../constants";
 import { promisify } from "util";
-import { deserializeTags } from "../tags";
+import { deserializeTags, signedTagBytes, verifyTagSection } from "../tags";
 import type { Base64URLString } from "../types";
 
 const read = promisify(FSRead);
@@ -75,13 +73,12 @@ export class FileDataItem implements BundleItem {
     }
 
     const tagsBytes = await read(handle.fd, Buffer.allocUnsafe(numberOfTagsBytes), 0, numberOfTagsBytes, tagsStart + 16).then((r) => r.buffer);
-    if (numberOfTags > 0) {
-      try {
-        deserializeTags(tagsBytes);
-      } catch (e) {
-        await handle.close();
-        return false;
-      }
+    let signedTags: Buffer;
+    try {
+      signedTags = verifyTagSection(numberOfTags, tagsBytes);
+    } catch (e) {
+      await handle.close();
+      return false;
     }
     const Signer = indexToType[sigType];
     const owner = await item.rawOwner();
@@ -93,7 +90,7 @@ export class FileDataItem implements BundleItem {
       owner,
       await item.rawTarget(),
       await item.rawAnchor(),
-      await item.rawTags(),
+      signedTags,
       createReadStream(filename, {
         start: await item.dataStart(),
       }),
@@ -244,7 +241,7 @@ export class FileDataItem implements BundleItem {
       await this.rawOwner(),
       await this.rawTarget(),
       await this.rawAnchor(),
-      await this.rawTags(),
+      signedTagBytes(await this.rawTags()),
       createReadStream(this.filename, { start: dataStart }),
     ]);
 
@@ -262,18 +259,21 @@ export class FileDataItem implements BundleItem {
   /**
    * @deprecated Since version 0.3.0. Will be deleted in version 0.4.0. Use @bundlr-network/client package instead to interact with Bundlr
    */
-  public async sendToBundler(bundler: string): Promise<AxiosResponse> {
+  public async sendToBundler(bundler: string): Promise<Response> {
     const headers = {
       "Content-Type": "application/octet-stream",
     };
 
     if (!this.isSigned()) throw new Error("You must sign before sending to bundler");
-    const response = await axios.post(`${bundler}/tx`, createReadStream(this.filename), {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 100000);
+    const response = await fetch(`${bundler}/tx`, {
+      method: "POST",
       headers,
-      timeout: 100000,
-      maxBodyLength: Infinity,
-      validateStatus: (status) => (status > 200 && status < 300) || status !== 402,
-    });
+      body: createReadStream(this.filename) as unknown as BodyInit,
+      duplex: "half",
+      signal: controller.signal,
+    } as RequestInit).finally(() => clearTimeout(timer));
 
     if (response.status === 402) throw new Error("Not enough funds to send data");
 

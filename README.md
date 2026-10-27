@@ -8,16 +8,16 @@ See [ANS-104](https://github.com/ArweaveTeam/arweave-standards/blob/master/ans/A
 
 Using npm:
 
-`npm install @ar.io/arbundles`
+`npm install @dha-team/arbundles`
 
 Using yarn:
 
-`yarn add @ar.io/arbundles`
+`yarn add @dha-team/arbundles`
 
 ## Creating bundles
 
 ```ts
-import { bundleAndSignData, createData } from "@ar.io/arbundles";
+import { bundleAndSignData, createData } from "@dha-team/arbundles";
 
 const dataItems = [createData("some data"), createData("some other data")];
 
